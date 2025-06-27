@@ -38,7 +38,7 @@ class Stats(object):
 
     def add_row(self, result):
         (name, ground_truth, answer, walltime) = (None, None, None, None)
-        print(self.tool.name, result)
+        #print(self.tool.name, result)
         if is_float(result[2]):
             name = result[0]
             ground_truth = self.UNSAFE
@@ -220,42 +220,6 @@ def make_diagram(solved_safe, solved_unsafe):
 
 
 
-def scatter_v2(toolstats, benchmarks):
-    scatter = {}
-    for tool in toolstats:
-        scatter[tool] = []
-    for bench in benchmarks:
-        for tool in toolstats:
-            result = toolstats[tool].get_scatter_row(bench)
-            if result[1] != '*':
-                scatter[tool].append(float(result[1]))
-    for tool in toolstats:
-        scatter[tool] = sorted(scatter[tool])
-    s = """\\begin{tikzpicture}
-            \\begin{axis}[
-            xlabel={Benchmarks},
-            ylabel={\# Solved},
-            title=Intraprocedural Benchmarks,
-            grid=both,
-            tick align = outside,
-            yticklabel style={/pgf/number format/fixed},     
-            scaled x ticks = false,
-            xticklabel style={/pgf/number format/fixed},
-            legend style={at={(1.05,1)}, anchor=north west}
-            ]
-            """
-    print(s)
-    s = "%"
-    for tool in toolstats:
-        print(f"%%%%%%  {tool} ")
-        print('\\addplot+[] coordinates {') # only marks
-        for i in range(len(scatter[tool])):
-            print(f'({i}, {scatter[tool][i]})') 
-        print('};')
-        print('\\addlegendentry{' + str(tool)+'};')
-
-    print('\\end{axis}')
-    print("\\end{tikzpicture}")
             
 
 def to_stream(stats, benchmarks, csvs):
@@ -291,41 +255,6 @@ def to_stream(stats, benchmarks, csvs):
                     streams[bench][tool]['ALL'].append((idx,row[3]))
 
 
-def scatter_v1(stats, benchmarks, keyword, csvs):
-    streams = to_stream(stats, benchmarks)
-
-    for bench in streams:
-        if keyword == None or keyword in bench:
-            s = """\\begin{tikzpicture}
-            \\begin{axis}[
-            xlabel={$N$},
-            ylabel={Time (s)},
-            title={""" + bench + """},
-            grid=both,
-            tick align = outside,
-            yticklabel style={/pgf/number format/fixed},     
-            scaled x ticks = false,
-            xticklabel style={/pgf/number format/fixed},
-            legend style={at={(1.05,1)}, anchor=north west}
-            ]
-            """
-            print(s)
-            for tool in streams[bench]:
-                        print(f'% {tool}, {bench}')
-                        print('\\addplot+[] coordinates {') # only marks
-                        for line in streams[bench][tool]['ALL']:
-                            print(f'({line[0]},{line[1]})')
-                        print('};')
-                        print('\\addlegendentry{' + str(tool)+'};')
-                        for line in streams[bench][tool]['OOM']:
-                            print(f'\draw[orange, thick] (axis cs:{line[0]},{line[1]}) circle (5pt);')
-                        for line in streams[bench][tool]['TLE']:
-                            print(f'\draw[red, thick] (axis cs:{line[0]},{line[1]}) circle (5pt);')
-                        for line in streams[bench][tool]['UNK']:
-                            print(f'\draw[brown, thick] (axis cs:{line[0]},{line[1]}) circle (5pt);')
-            print("""
-                \end{axis}
-                \end{tikzpicture}""")
 
 
 
