@@ -9,12 +9,14 @@ def is_float(n):
 
 
 class Stats(object):
-    def __init__(self, tool):
+    def __init__(self, tool, default_val):
         self.SAFE = 'TRUE'
         self.UNSAFE = 'FALSE'
         self.TIMEOUT = 'TIMEOUT'
         self.OOM = 'OOM'
         self.UNKNOWN = 'UNKNOWN'
+
+        self.default_val = default_val #self.SAFE if default_val == self.SAFE else self.UNSAFE
 
         self.tool = tool 
         
@@ -41,7 +43,7 @@ class Stats(object):
         #print(self.tool.name, result)
         if is_float(result[2]):
             name = result[0]
-            ground_truth = self.UNSAFE
+            ground_truth = self.default_val #self.UNSAFE
             answer = self.determine_answer(result[1])
             walltime = float(result[3])
         else:
@@ -148,8 +150,9 @@ class Stats(object):
 
 class Tool(object):
 
-    def __init__(self, name, csvfiles):
+    def __init__(self, name, csvfiles, default_val):
         self.name = name
+        self.default_val = default_val
         self.csvfiles = csvfiles
         self.read()
 
@@ -170,7 +173,7 @@ class Tool(object):
         return list(map(lambda x: x[0], self.content))
 
     def stats(self):
-        st = Stats(self)
+        st = Stats(self, self.default_val)
         for bench in self.content:
             st.add_row(bench)
         return st
